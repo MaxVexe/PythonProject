@@ -185,6 +185,18 @@ def get_files(folder_path):
     This Function takes in a directory and returns the files in the directory if any
 
     """
+    try:
+        # Get list of files in the directory
+        files = os.listdir(folder_path)
+
+        # Filter out directories, keeping only files
+        files = [file for file in files if os.path.isfile(os.path.join(folder_path, file))]
+
+        return files
+    
+    except Exception as e:
+        print(f"An error occurred while getting files: {e}")
+        return []
 
 
     return
