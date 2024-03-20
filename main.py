@@ -151,15 +151,31 @@ def get_config(path_config = None):
     return 
 
 
-
-def folder_creation(configuration):
+ # added new parameter for Directary 
+def folder_creation(configuration,folder_dic):
     
     """
     Based on the configuration create the folders needed
 
     Parameters:
     configuration(dict): dictionary with 
+    folder_dict: the location of the folder 
     """
+    try: 
+        #goes through configuration keys 
+        for folder_name in configuration.keys():
+            # joins the name together to create the new path 
+            folder_path = os.path.join(folder_dic,folder_name)
+            # if the path isn't in our directory create, else it exist
+            if not os.path.exists(folder_path):
+                os.makedirs(folder_path)
+                print(f"Folder has been created: {folder_name}")
+            else:
+                print(f"Folder already exist{folder_name}")
+        
+    except Exception as e:
+        print(f" An error has happen: {e}")
+
 
     return
 
