@@ -89,7 +89,7 @@ What else we need
 -moving the files to the correct folder
 """
 
-import os, argparse, platform, json
+import os, argparse, platform, json, shutil
 
 # By default the config file is in the same folder as the script
 DEFAULT_CONFIG_LOCATION = f"./sorter_config.json"
@@ -152,42 +152,26 @@ def get_config(path_config = None):
 
 
 
-def folder_creation(configuration):
-    
-    """
-    Based on the configuration create the folders needed
-
-    Parameters:
-    configuration(dict): dictionary with 
-    """
-
-    return
-
 
 def get_files(folder_path):
     """
     This Function takes in a directory and returns the files in the directory if any
     """
-    files = []
+    try:
+        # Get list of files in the directory
+        files = os.listdir(folder_path)
 
-    # List of everything in the folder
-    folder_contents = os.listdir(folder_path)
-    # print(folder_contents)
-    # First lets remove possible subfolders in the list of files
-    
-    for contents in folder_contents:
-        # item_path is the direct path to the file
-        item_path = os.path.join(folder_path, contents)
+        # Filter out directories, keeping only files
+        files = [file for file in files if os.path.isfile(os.path.join(folder_path, file))]
 
-        if os.path.isfile(item_path):
-            files.append(f'{item_path}')
+        return files
 
+    except Exception as e:
+        print(f"An error occurred while getting files: {e}")
+        return []
 
 
-    # print(files)
-
-
-    return files
+    return
 
 
 def get_folders(folder_path):
@@ -212,9 +196,59 @@ def get_folders(folder_path):
 
 
 
+def move_files(folder_path,config):
+    """
+    This sorts the files in a directory given a directory
+    uses the config dict{} as a way to filter which files goes where
+    """
+    
+    # get the files in the folder as a list
+    files = get_files(folder_path)
+
+    # loop throught the files
+    for file in files:
+        extension = os.path.splitext(file)[1].lower()
+
+        # File type is also folder name for the sorter
+        for file_type, extensions in config.items():
+                if extension in extensions:
+                    full_path_file = os.path.join(folder_path, file)
+                    full_path_folder = os.path.join(folder_path, file_type)
+
+                    shutil.move(full_path_file, full_path_folder)
 
 
 
+                    # print(file_type,full_path_file,full_path_folder)
+    
+    return
+
+
+def folder_creation(configuration,folder_dic):
+
+    """
+    Based on the configuration create the folders needed
+    Parameters:
+    configuration(dict): dictionary with 
+    folder_dict: the location of the folder 
+    """
+    try: 
+        #goes through configuration keys 
+        for folder_name in configuration.keys():
+            # joins the name together to create the new path 
+            folder_path = os.path.join(folder_dic,folder_name)
+            # if the path isn't in our directory create, else it exist
+            if not os.path.exists(folder_path):
+                os.makedirs(folder_path)
+                print(f"Folder has been created: {folder_name}")
+            else:
+                print(f"Folder already exist{folder_name}")
+
+    except Exception as e:
+        print(f" An error has happen: {e}")
+
+
+    return
 
 
 
@@ -254,24 +288,19 @@ def main():
 
 
     """STEP 3 Foler Creation"""
-    # based on the config{} check to see if folders are created if they are not create them
-    # First Check if folders exist
-    # if folders exist then don't do anything
+    folder_creation(config,folderDir)
 
-    folders = get_folders(folderDir)
-    print(folders)
+
+
 
     
     """STEP 4 List out all the files"""
     files = get_files(folderDir)
     print(files)
-    
 
-    
-    
 
     """STEP 5 Moving Files to Correct Folder"""
-
+    move_files(folderDir,config)
 
 
     """STEP 6 Encryption"""
@@ -280,8 +309,5 @@ def main():
 
     return
 
-
-
-# os.mkdir("/test/w3school") 
 
 main()
